@@ -1,0 +1,9 @@
+{
+  "name": "sylph-router",
+  "version": "0.0.0",
+  "main": "main.js",
+  "repository": "git@github.com:jetdevuk/sylph-router.git",
+  "author": "Matt Barker <jetdevuk@gmail.com>",
+  "license": "Apache-2.0",
+  "private": false
+}
