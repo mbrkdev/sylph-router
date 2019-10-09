@@ -6,5 +6,13 @@
   "author": "Matt Barker <jetdevuk@gmail.com>",
   "license": "Apache-2.0",
   "description": "A small router used to generate sylph server routes",
-  "private": false
+  "private": false,
+  "devDependencies": {
+    "eslint": "^6.5.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2"
+  },
+  "dependencies": {
+    "readdirp": "^3.1.3"
+  }
 }
