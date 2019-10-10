@@ -8,6 +8,7 @@
   "description": "A small router used to generate sylph server routes",
   "private": false,
   "devDependencies": {
+    "ava": "^2.4.0",
     "eslint": "^6.5.1",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2"
