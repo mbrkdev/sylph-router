@@ -17,7 +17,7 @@ async function scan(root, imports, options) {
   const replaceFunction = options ? options.replace : replace;
 
   const r = await readdirp.promise(root, {
-    fileFilter: '*.js',
+    fileFilter: options && options.fileFilter ? options.fileFilter : '*.js',
     directoryFilter: options ? options.filter : ['!public', '!*utils'],
   });
   for (let y = 0; y < r.length; y += 1) {
@@ -28,7 +28,12 @@ async function scan(root, imports, options) {
       const imp = require(path.resolve(root, route.path))[imports[i]]; //eslint-disable-line
       routeObject[imports[i]] = imp;
     }
-    routes[routePath] = routeObject;
+    const rp = routePath.split('/');
+    const type = rp.shift();
+    let routerPath = rp.join('/');
+    if (routerPath === '') routerPath = '/';
+    routeObject.type = type;
+    routes[routerPath] = routeObject;
   }
   return routes;
 }
