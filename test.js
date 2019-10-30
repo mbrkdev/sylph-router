@@ -8,17 +8,26 @@ async function init() {
     if (routes) t.pass();
   });
   test('route /get/index.js', (t) => {
-    if (routes.get) t.pass();
+    if (routes['/']) t.pass();
   });
   test('route /get/index.js handler exists', (t) => {
-    if (routes.get.handler) t.pass();
+    if (routes['/'].handler) t.pass();
   });
   test('route /get/index.js call handler', async (t) => {
-    const result = await routes.get.handler();
+    const result = await routes['/'].handler();
     if (result === 'hi!') t.pass();
   });
   test('route /get/index.js middleware undefined', (t) => {
-    if (!routes.get.middleware) t.pass();
+    if (!routes['/'].middleware) t.pass();
+  });
+  test('post route user/create exists', (t) => {
+    if (routes['user/create']) t.pass();
+  });
+  test('post route user/create handler exists', (t) => {
+    if (routes['user/create'].handler) t.pass();
+  });
+  test('post route user/create type === post', (t) => {
+    if (routes['user/create'].type === 'post') t.pass();
   });
 }
 
