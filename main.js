@@ -14,11 +14,11 @@ function replace(route) {
 
 async function scan(root, imports, options) {
   const routes = {};
-  const replaceFunction = options ? options.replace : replace;
+  const replaceFunction = options && options.replace || replace;
 
   const r = await readdirp.promise(root, {
     fileFilter: options && options.fileFilter ? options.fileFilter : '*.js',
-    directoryFilter: options ? options.filter : ['!public', '!*utils'],
+    directoryFilter: options && options.filter || ['!public', '!*utils'],
   });
   for (let y = 0; y < r.length; y += 1) {
     const route = r[y];
@@ -32,8 +32,12 @@ async function scan(root, imports, options) {
     const type = rp.shift();
     let routerPath = rp.join('/');
     if (routerPath === '') routerPath = '/';
-    routeObject.type = type;
-    routes[routerPath] = routeObject;
+    if(options && options.flat) {
+      routes[routerPath === '/' ? type : `${type}/${routerPath}`] = routeObject;
+    } else {
+      if(!routes[type]) routes[type] = {};
+      routes[type][routerPath] = routeObject;
+    }
   }
   return routes;
 }
