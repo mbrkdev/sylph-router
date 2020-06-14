@@ -32,3 +32,21 @@
 // }
 
 // init();
+import {scan, ScanResults} from '../dist/main'
+
+let scanResults: ScanResults;
+async function boot() {
+  scanResults = await scan('./example', ['handler'], {
+    directoryBanlist: ['banned']
+  })
+}
+describe('Routes Build Correctly', () => {
+  beforeAll(async () => {
+    await boot()
+  })
+  test('available valid routes are more than one', async () => {
+    const {routes} = scanResults
+    console.log(routes);
+    expect(routes.length >= 1).toBe(true);
+  });
+})

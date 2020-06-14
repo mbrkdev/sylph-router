@@ -1,7 +1,7 @@
 import {default as readdirp, EntryInfo} from 'readdirp';
 import * as path from 'path';
 
-interface ScanOptions {
+export interface ScanOptions {
   directoryBanlist: string[]
   fileFilter?: string[]
 }
@@ -11,11 +11,15 @@ const defaultScanOptions:ScanOptions = {
   fileFilter: ['*.js', '*.ts', '!*.test.js', '!*.test.ts']
 }
 
-export async function scan(root: string, imports: string[], scanOptions: ScanOptions) {
+export interface ScanResults {
+  routes: string[]
+}
+
+export async function scan(root: string, imports: string[], scanOptions: ScanOptions): Promise<ScanResults> {
   // Resolve root from working dir & apply options over defaults.
   const resolvedRoot = path.resolve(process.cwd(), root);
   const options = {...defaultScanOptions, ...scanOptions}
-
+  
   // Convert '\' to '/' in file paths
   const normalisedBanlist: string[] = [];
   options.directoryBanlist.forEach(filter => {
@@ -35,8 +39,12 @@ export async function scan(root: string, imports: string[], scanOptions: ScanOpt
     }
   });
   console.log('------------');
-  
+  const _r:string[] = [];
   files.forEach(file => {
     console.log(` - ${file.path}`);
+    _r.push(file.path)
   })
+  console.log(_r);
+  
+  return {routes:_r};
 }
