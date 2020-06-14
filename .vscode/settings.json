@@ -1,5 +1,8 @@
 {
   "cSpell.words": [
+    "jetdevuk",
+    "normalised",
     "readdirp"
-  ]
+  ],
+  "deno.enable": false
 }
