@@ -35,18 +35,28 @@
 import {scan, ScanResults} from '../dist/main'
 
 let scanResults: ScanResults;
-async function boot() {
-  scanResults = await scan('./example', ['handler'], {
-    directoryBanlist: ['banned']
-  })
-}
-describe('Routes Build Correctly', () => {
+
+describe('Scan for existing folder', () => {
   beforeAll(async () => {
-    await boot()
+    scanResults = await scan('./example', ['handler'], {
+      directoryBanlist: ['banned']
+    })
   })
+  
   test('available valid routes are more than one', async () => {
     const {routes} = scanResults
     console.log(routes);
     expect(routes.length >= 1).toBe(true);
+  });
+})
+
+describe('Scan for non-existant folder', () => {
+  beforeAll(async () => {
+    scanResults = await scan('./thisFolderDoesNotExist', ['handler'])
+  })
+  
+  test('available valid routes are zero', async () => {
+    const {routes} = scanResults
+    expect(routes.length >= 1).not.toBe(true);
   });
 })

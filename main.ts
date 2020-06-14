@@ -15,7 +15,7 @@ export interface ScanResults {
   routes: string[]
 }
 
-export async function scan(root: string, imports: string[], scanOptions: ScanOptions): Promise<ScanResults> {
+export async function scan(root: string, imports: string[], scanOptions?: ScanOptions): Promise<ScanResults> {
   // Resolve root from working dir & apply options over defaults.
   const resolvedRoot = path.resolve(process.cwd(), root);
   const options = {...defaultScanOptions, ...scanOptions}
