@@ -11,13 +11,35 @@
   "devDependencies": {
     "@types/jest": "^26.0.0",
     "@types/node": "^14.0.13",
+    "@typescript-eslint/eslint-plugin": "^3.3.0",
+    "@typescript-eslint/parser": "^3.3.0",
+    "eslint": "^7.2.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "husky": "^4.2.5",
     "jest": "^26.0.1",
+    "lint-staged": "^10.2.10",
+    "prettier": "^2.0.5",
     "ts-jest": "^26.1.0",
     "typescript": "^3.9.5"
   },
   "scripts": {
-    "test": "npx ava",
+    "test": "jest",
+    "test-watch": "jest --watch",
+    "lint": "eslint */**/*.{js,ts} --quiet --fix",
+    "lint-ci": "eslint */**/*.{js,ts} --quiet",
     "prepublish": "tsc"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && yarn test",
+      "pre-push": "yarn test"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "readdirp": "^3.1.3"

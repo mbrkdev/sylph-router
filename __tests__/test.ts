@@ -32,31 +32,42 @@
 // }
 
 // init();
-import {scan, ScanResults} from '../dist/main'
-
-let scanResults: ScanResults;
+import { scan, ScanResults } from '../dist/main';
 
 describe('Scan for existing folder', () => {
+  let routes: string[];
   beforeAll(async () => {
-    scanResults = await scan('./example', ['handler'], {
-      directoryBanlist: ['banned']
-    })
-  })
-  
+    const scanResults: ScanResults = await scan('./example', ['handler'], {
+      directoryBanlist: ['banned'],
+    });
+    routes = scanResults.routes.map((r) => r.replace('\\', '/'));
+  });
+
   test('available valid routes are more than one', async () => {
-    const {routes} = scanResults
-    console.log(routes);
     expect(routes.length >= 1).toBe(true);
   });
-})
+
+  test('valid route exists', async () => {
+    expect(routes.indexOf('get/index.js')).not.toBe(-1);
+  });
+
+  test('banned folder should not produce any results', async () => {
+    expect(routes.indexOf('banned/banned.js')).toBe(-1);
+  });
+
+  test('banned folder should not produce any subfolder results', async () => {
+    expect(routes.indexOf('banned/sub-banned/also-banned.js')).toBe(-1);
+  });
+});
 
 describe('Scan for non-existant folder', () => {
+  let scanResults: ScanResults;
   beforeAll(async () => {
-    scanResults = await scan('./thisFolderDoesNotExist', ['handler'])
-  })
-  
+    scanResults = await scan('./thisFolderDoesNotExist', ['handler']);
+  });
+
   test('available valid routes are zero', async () => {
-    const {routes} = scanResults
+    const { routes } = scanResults;
     expect(routes.length >= 1).not.toBe(true);
   });
-})
+});
