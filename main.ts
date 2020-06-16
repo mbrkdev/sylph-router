@@ -12,8 +12,13 @@ const defaultScanOptions: ScanOptions = {
   fileFilter: ['*.js', '*.ts', '!*.test.js', '!*.test.ts'],
 };
 
+type ScanImports = unknown & {
+  // eslint-disable-next-line
+  [key: string]: () => any;
+};
+
 export interface ScanResults {
-  routes: string[];
+  [key: string]: ScanImports;
 }
 
 export async function scan(root: string, imports: string[], scanOptions?: ScanOptions): Promise<ScanResults> {
@@ -25,7 +30,7 @@ export async function scan(root: string, imports: string[], scanOptions?: ScanOp
   const normalisedBanlist: string[] = [];
   if (options.directoryBanlist) {
     options.directoryBanlist.forEach((filter) => {
-      normalisedBanlist.push(filter.replace('\\', '/'));
+      normalisedBanlist.push(filter.replace(/\\/g, '/'));
     });
   }
 
@@ -36,24 +41,30 @@ export async function scan(root: string, imports: string[], scanOptions?: ScanOp
     directoryFilter: (entry: EntryInfo): boolean => {
       for (let i = 0; i < normalisedBanlist.length; i += 1) {
         const filter = normalisedBanlist[i];
-        const normalisedPath = entry.path.replace('\\', '/');
+        const normalisedPath = entry.path.replace(/\\/g, '/');
         if (normalisedPath === filter) return false;
       }
       return true;
     },
   });
 
-  const _r: string[] = [];
+  const _i: ScanResults = {};
 
   // Iterate file list, normalise and run replace function
-  files.forEach((file) => {
-    const normalisedPath = file.path.replace('\\', '/');
+  files.forEach(async (file) => {
+    const normalisedPath = file.path.replace(/\\/g, '/');
+    const routeImport = await import(path.resolve(process.cwd(), root, normalisedPath));
+
+    const importRecord: ScanImports = {};
+    imports.forEach((importKey: string) => {
+      importRecord[importKey] = routeImport[importKey];
+    });
     if (options.replaceFunction) {
-      _r.push(options.replaceFunction(normalisedPath));
+      const replacedPath = options.replaceFunction(normalisedPath);
+      _i[replacedPath] = importRecord;
     } else {
-      _r.push(normalisedPath);
+      _i[normalisedPath] = importRecord;
     }
   });
-
-  return { routes: _r };
+  return _i;
 }

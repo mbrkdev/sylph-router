@@ -1,83 +1,63 @@
-// import test from 'ava';
-
-// const { scan } = require('./main');
-
-// async function init() {
-//   const routes = await scan('example', ['handler', 'middleware']);
-//   test('routes exists', (t) => {
-//     if (routes) t.pass();
-//   });
-//   test('route /get/index.js', (t) => {
-//     if (routes['/']) t.pass();
-//   });
-//   test('route /get/index.js handler exists', (t) => {
-//     if (routes['/'].handler) t.pass();
-//   });
-//   test('route /get/index.js call handler', async (t) => {
-//     const result = await routes['/'].handler();
-//     if (result === 'hi!') t.pass();
-//   });
-//   test('route /get/index.js middleware undefined', (t) => {
-//     if (!routes['/'].middleware) t.pass();
-//   });
-//   test('post route user/create exists', (t) => {
-//     if (routes['user/create']) t.pass();
-//   });
-//   test('post route user/create handler exists', (t) => {
-//     if (routes['user/create'].handler) t.pass();
-//   });
-//   test('post route user/create type === post', (t) => {
-//     if (routes['user/create'].type === 'post') t.pass();
-//   });
-// }
-
-// init();
 import { scan, ScanResults } from '../dist/main';
 
 describe('Scan for existing folder', () => {
-  let routes: string[];
+  let scanResults: ScanResults;
   beforeAll(async () => {
-    const scanResults: ScanResults = await scan('./example', ['handler'], {
+    scanResults = await scan('./example', ['handler'], {
       directoryBanlist: ['banned'],
     });
-    routes = scanResults.routes.map((r) => r.replace('\\', '/'));
   });
 
   test('available valid routes are more than one', async () => {
-    expect(routes.length >= 1).toBe(true);
+    expect(Object.keys(scanResults).length >= 1).toBe(true);
   });
 
   test('valid route exists', async () => {
-    expect(routes.indexOf('get/index.js')).not.toBe(-1);
+    expect(Object.keys(scanResults).indexOf('get/index.js')).not.toBe(-1);
   });
 
   test('banned folder should not produce any results', async () => {
-    expect(routes.indexOf('banned/banned.js')).toBe(-1);
+    expect(Object.keys(scanResults).indexOf('banned/banned.js')).toBe(-1);
   });
 
   test('banned folder should not produce any subfolder results', async () => {
-    expect(routes.indexOf('banned/sub-banned/also-banned.js')).toBe(-1);
+    expect(Object.keys(scanResults).indexOf('banned/sub-banned/also-banned.js')).toBe(-1);
   });
 });
 
 describe('Scan with replacer function', () => {
-  let routes: string[];
+  let scanResults: ScanResults;
   beforeAll(async () => {
-    const scanResults: ScanResults = await scan('./example', ['handler'], {
+    scanResults = await scan('./example', ['handler'], {
       directoryBanlist: ['banned'],
       replaceFunction: (route: string) => {
         return route.replace(/\//g, '-').replace(/.[t|j]s$/, '');
       },
     });
-    routes = scanResults.routes.map((r) => r.replace('\\', '/'));
   });
 
   test('route replaces / with - and omits .js', async () => {
-    expect(routes.indexOf('get-index')).not.toBe(-1);
+    expect(scanResults['get-index']).not.toBe(undefined);
   });
 
   test('route replaces / with - and omits .ts', async () => {
-    expect(routes.indexOf('get-indexts')).not.toBe(-1);
+    expect(scanResults['get-indexts']).not.toBe(undefined);
+  });
+
+  test('route handler available on replaced route', async () => {
+    const handler: () => unknown = scanResults['get-index'].handler;
+    expect(handler).not.toBe(undefined);
+  });
+
+  test('route handler available can be run', async () => {
+    const handler: () => string = scanResults['get-index'].handler;
+    const result: string = await handler();
+    expect(result).toBe('hi!');
+  });
+
+  test('valid route with no handler is undefined', async () => {
+    const handler: () => unknown = scanResults['get-indexts'].handler;
+    expect(handler).toBe(undefined);
   });
 });
 
@@ -88,7 +68,6 @@ describe('Scan for non-existant folder', () => {
   });
 
   test('available valid routes are zero', async () => {
-    const { routes } = scanResults;
-    expect(routes.length >= 1).not.toBe(true);
+    expect(Object.keys(scanResults).length >= 1).toBe(false);
   });
 });
