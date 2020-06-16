@@ -1,8 +1,10 @@
 {
   "cSpell.words": [
+    "esnext",
     "jetdevuk",
     "normalised",
-    "readdirp"
+    "readdirp",
+    "tslib"
   ],
   "deno.enable": false
 }
