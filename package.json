@@ -24,6 +24,7 @@
     "typescript": "^3.9.5"
   },
   "scripts": {
+    "dev": "tsc --watch",
     "test": "jest",
     "test-watch": "jest --watch",
     "lint": "eslint */**/*.{js,ts} --quiet --fix",

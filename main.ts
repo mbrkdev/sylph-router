@@ -2,8 +2,9 @@ import { default as readdirp, EntryInfo } from 'readdirp';
 import * as path from 'path';
 
 export interface ScanOptions {
-  directoryBanlist: string[];
+  directoryBanlist?: string[];
   fileFilter?: string[];
+  replaceFunction?: (route: string) => string;
 }
 
 const defaultScanOptions: ScanOptions = {
@@ -22,10 +23,13 @@ export async function scan(root: string, imports: string[], scanOptions?: ScanOp
 
   // Convert '\' to '/' in file paths
   const normalisedBanlist: string[] = [];
-  options.directoryBanlist.forEach((filter) => {
-    normalisedBanlist.push(filter.replace('\\', '/'));
-  });
+  if (options.directoryBanlist) {
+    options.directoryBanlist.forEach((filter) => {
+      normalisedBanlist.push(filter.replace('\\', '/'));
+    });
+  }
 
+  // Get file list from directory structure
   const files = await readdirp.promise(resolvedRoot, {
     fileFilter: options.fileFilter,
 
@@ -38,13 +42,18 @@ export async function scan(root: string, imports: string[], scanOptions?: ScanOp
       return true;
     },
   });
-  console.log('------------');
+
   const _r: string[] = [];
+
+  // Iterate file list, normalise and run replace function
   files.forEach((file) => {
-    console.log(` - ${file.path}`);
-    _r.push(file.path);
+    const normalisedPath = file.path.replace('\\', '/');
+    if (options.replaceFunction) {
+      _r.push(options.replaceFunction(normalisedPath));
+    } else {
+      _r.push(normalisedPath);
+    }
   });
-  console.log(_r);
 
   return { routes: _r };
 }

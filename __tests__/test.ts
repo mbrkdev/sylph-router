@@ -60,6 +60,27 @@ describe('Scan for existing folder', () => {
   });
 });
 
+describe('Scan with replacer function', () => {
+  let routes: string[];
+  beforeAll(async () => {
+    const scanResults: ScanResults = await scan('./example', ['handler'], {
+      directoryBanlist: ['banned'],
+      replaceFunction: (route: string) => {
+        return route.replace(/\//g, '-').replace(/.[t|j]s$/, '');
+      },
+    });
+    routes = scanResults.routes.map((r) => r.replace('\\', '/'));
+  });
+
+  test('route replaces / with - and omits .js', async () => {
+    expect(routes.indexOf('get-index')).not.toBe(-1);
+  });
+
+  test('route replaces / with - and omits .ts', async () => {
+    expect(routes.indexOf('get-indexts')).not.toBe(-1);
+  });
+});
+
 describe('Scan for non-existant folder', () => {
   let scanResults: ScanResults;
   beforeAll(async () => {
