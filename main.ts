@@ -51,7 +51,7 @@ export async function scan(root: string, imports: string[], scanOptions?: ScanOp
   const _i: ScanResults = {};
 
   // Iterate file list, normalise and run replace function
-  files.forEach(async (file) => {
+  await files.forEach(async (file) => {
     const normalisedPath = file.path.replace(/\\/g, '/');
     const routeImport = await import(path.resolve(process.cwd(), root, normalisedPath));
 
@@ -66,5 +66,6 @@ export async function scan(root: string, imports: string[], scanOptions?: ScanOp
       _i[normalisedPath] = importRecord;
     }
   });
+
   return _i;
 }

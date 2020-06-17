@@ -113,3 +113,30 @@ describe('Scan for non-existant folder', () => {
     expect(Object.keys(scanResults).length >= 1).toBe(false);
   });
 });
+
+describe('Scan with complex replacer function', () => {
+  let scanResults: ScanResults;
+  beforeAll(async () => {
+    scanResults = await scan('./example', ['handler'], {
+      replaceFunction: (route: string) => {
+        return route
+          .replace(/\\/gi, '/') // Backslash to forward slash
+          .replace(/\/$/gi, '') // Remove ending slash (for xx/index)
+          .replace(/ /gi, '-') // Spaces to dashes
+          .replace(/index.([t|j])s/, '.$1s') // Change index to just .t/js
+          .replace(/\.[t|j]s/g, '') // Remove .t/js
+          .replace(/_/gi, ':') // Underscore to colon (for dynamic routes)
+          .replace(/\/$/gi, '') // Remove ending slash (for xx/index));
+          .replace(/^(\w+)$/, '$1/'); // replace xxx/index with xxx/
+      },
+    });
+  });
+
+  test('available route /get/index.js becomes /', async () => {
+    expect(!!scanResults['get/']).toBe(true);
+  });
+
+  test('available route /get/indexts.ts becomes get/indexts', async () => {
+    expect(!!scanResults['get/indexts']).toBe(true);
+  });
+});
