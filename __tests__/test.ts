@@ -64,7 +64,7 @@ describe('Scan with replacer function', () => {
 describe('Multiple exported handlers', () => {
   let scanResults: ScanResults;
   beforeAll(async () => {
-    scanResults = await scan('./example', ['handler', 'secondHandler'], {
+    scanResults = await scan('./example', ['handler', 'secondHandler', 'echoHandler'], {
       directoryBanlist: ['banned'],
     });
   });
@@ -89,6 +89,17 @@ describe('Multiple exported handlers', () => {
     const handler: () => string = scanResults['get/index.js'].secondHandler;
     const result: string = await handler();
     expect(result).toBe('bye!');
+  });
+
+  test('echo handler exists', async () => {
+    const handler: () => unknown = scanResults['get/index.js'].handler;
+    expect(handler).not.toBe(undefined);
+  });
+
+  test('echo handler works perfectly', async () => {
+    const handler: (val: string) => string = scanResults['get/index.js'].echoHandler;
+    const result = await handler('echo');
+    expect(result).toBe('echo!');
   });
 });
 
