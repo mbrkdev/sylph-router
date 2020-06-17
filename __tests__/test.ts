@@ -61,6 +61,37 @@ describe('Scan with replacer function', () => {
   });
 });
 
+describe('Multiple exported handlers', () => {
+  let scanResults: ScanResults;
+  beforeAll(async () => {
+    scanResults = await scan('./example', ['handler', 'secondHandler'], {
+      directoryBanlist: ['banned'],
+    });
+  });
+
+  test('primary handler exists', async () => {
+    const handler: () => unknown = scanResults['get/index.js'].handler;
+    expect(handler).not.toBe(undefined);
+  });
+
+  test('primary handler can be run', async () => {
+    const handler: () => string = scanResults['get/index.js'].handler;
+    const result: string = await handler();
+    expect(result).toBe('hi!');
+  });
+
+  test('secondary handler exists', async () => {
+    const handler: () => unknown = scanResults['get/index.js'].secondHandler;
+    expect(handler).not.toBe(undefined);
+  });
+
+  test('secondary handler can be run', async () => {
+    const handler: () => string = scanResults['get/index.js'].secondHandler;
+    const result: string = await handler();
+    expect(result).toBe('bye!');
+  });
+});
+
 describe('Scan for non-existant folder', () => {
   let scanResults: ScanResults;
   beforeAll(async () => {
