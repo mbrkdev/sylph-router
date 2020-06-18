@@ -71,6 +71,7 @@
     "dist",
     "__tests__",
     "example",
-    "deno.ts"
+    "deno.ts",
+    "deno"
   ]
 }
