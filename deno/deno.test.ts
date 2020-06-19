@@ -20,7 +20,14 @@ Deno.test("results handler returns expected value", async () => {
   assertEquals(handler() === 'handler', true);
 });
 
-Deno.test("banned directory not in result", async () => {
+Deno.test("banned directory (via fileFilter) not in result", async () => {
   assertEquals(!results['example/banned/sub-banned/real.ts'], true);
+});
+
+Deno.test("banned directory (via directoryBanlist) not in result", async () => {
+  const r: ScanResults = await scan('./example', ['handler'], {
+    directoryBanlist: ['banned']
+  })
+  assertEquals(!r['example/banned/sub-banned/real.ts'], true);
 });
 

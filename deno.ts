@@ -1,7 +1,7 @@
 import { join } from 'https://deno.land/std/path/mod.ts';
 
 async function recursiveReaddir(path: string, options: ScanOptions) {
-  const files: string[] = [];
+  let files: string[] = [];
   const getFiles = async (path: string) => {
     for await (const dirEntry of Deno.readDir(path)) {
       if (dirEntry.isDirectory) {
@@ -11,27 +11,40 @@ async function recursiveReaddir(path: string, options: ScanOptions) {
       }
     }
   };
+
   await getFiles(path);
-  const _r: string[] = [];
+
+  let fileFilter: RegExp[];
+  let directoryBanlist: string[];
+
   if (options.fileFilter) {
-    const { fileFilter } = options;
-    files.map((file) => {
-      let matches = false;
-      fileFilter.forEach((filter) => {
-        if (file.match(filter)) {
-          matches = true;
-        }
-        // if (!file.includes('.js') && !file.includes('.test.ts'))
-      });
-      if (!matches) _r.push(file);
-    });
+    fileFilter = options.fileFilter;
   }
-  return _r;
+
+  if (options.directoryBanlist) {
+    directoryBanlist = options.directoryBanlist;
+  }
+
+  files = files.filter((file) => {
+    for (const filter of fileFilter) {
+      if (file.match(filter)) {
+        return false;
+      }
+    }
+    for (const filter of directoryBanlist) {
+      const f = new RegExp(`[\\\\|/]${filter}[\\\\|/]`);
+      if (file.match(f)) {
+        return false;
+      }
+    }
+    return true;
+  });
+  return files;
 }
 
 export interface ScanOptions {
-  directoryBanlist?: string[]; // not working
-  fileFilter?: RegExp[]; // not working
+  directoryBanlist?: string[];
+  fileFilter?: RegExp[];
   replaceFunction?: (route: string) => string;
 }
 
