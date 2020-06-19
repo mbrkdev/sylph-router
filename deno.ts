@@ -1,4 +1,23 @@
-import { recursiveReaddir } from 'https://deno.land/x/recursive_readdir/mod.ts';
+import { join } from 'https://deno.land/std/path/mod.ts';
+
+async function recursiveReaddir(path: string) {
+  const files: string[] = [];
+  const getFiles = async (path: string) => {
+    for await (const dirEntry of Deno.readDir(path)) {
+      if (dirEntry.isDirectory) {
+        await getFiles(join(path, dirEntry.name));
+      } else if (dirEntry.isFile) {
+        files.push(join(path, dirEntry.name));
+      }
+    }
+  };
+  await getFiles(path);
+  const _r: string[] = [];
+  files.forEach((file) => {
+    if (!file.includes('.js') && !file.includes('.test.ts')) _r.push(file);
+  });
+  return _r;
+}
 
 export interface ScanOptions {
   directoryBanlist?: string[]; // not working
@@ -8,7 +27,7 @@ export interface ScanOptions {
 
 const defaultScanOptions: ScanOptions = {
   directoryBanlist: [],
-  fileFilter: ['*.js', '*.ts', '!*.test.js', '!*.test.ts'],
+  fileFilter: ['*.ts', '!*.test.ts'],
 };
 
 type ScanImports = unknown & {
