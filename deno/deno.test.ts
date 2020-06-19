@@ -1,7 +1,9 @@
 import { assertEquals } from 'https://deno.land/std/testing/asserts.ts';
 import {scan, ScanResults} from '../deno.ts'
 
-const results: ScanResults = await scan('./example', ['handler'])
+const results: ScanResults = await scan('./example', ['handler'], {
+  fileFilter: [/.js$/, /[\/|\\]banned[\/|\\]/]
+})
 
 Deno.test("results return", async () => {
   assertEquals(!!results, true);
@@ -16,5 +18,9 @@ Deno.test("results return handler", async () => {
 Deno.test("results handler returns expected value", async () => {
   const handler = results['example/get/real.ts'].handler
   assertEquals(handler() === 'handler', true);
+});
+
+Deno.test("banned directory not in result", async () => {
+  assertEquals(!results['example/banned/sub-banned/real.ts'], true);
 });
 

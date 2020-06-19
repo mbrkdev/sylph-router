@@ -1,6 +1,6 @@
 import { join } from 'https://deno.land/std/path/mod.ts';
 
-async function recursiveReaddir(path: string) {
+async function recursiveReaddir(path: string, options: ScanOptions) {
   const files: string[] = [];
   const getFiles = async (path: string) => {
     for await (const dirEntry of Deno.readDir(path)) {
@@ -13,21 +13,31 @@ async function recursiveReaddir(path: string) {
   };
   await getFiles(path);
   const _r: string[] = [];
-  files.forEach((file) => {
-    if (!file.includes('.js') && !file.includes('.test.ts')) _r.push(file);
-  });
+  if (options.fileFilter) {
+    const { fileFilter } = options;
+    files.map((file) => {
+      let matches = false;
+      fileFilter.forEach((filter) => {
+        if (file.match(filter)) {
+          matches = true;
+        }
+        // if (!file.includes('.js') && !file.includes('.test.ts'))
+      });
+      if (!matches) _r.push(file);
+    });
+  }
   return _r;
 }
 
 export interface ScanOptions {
   directoryBanlist?: string[]; // not working
-  fileFilter?: string[]; // not working
+  fileFilter?: RegExp[]; // not working
   replaceFunction?: (route: string) => string;
 }
 
 const defaultScanOptions: ScanOptions = {
   directoryBanlist: [],
-  fileFilter: ['*.ts', '!*.test.ts'],
+  fileFilter: [/\.js$/, /\.test\.ts$/, /\.test\.js$/],
 };
 
 type ScanImports = unknown & {
@@ -52,7 +62,7 @@ export async function scan(root: string, imports: string[], scanOptions?: ScanOp
   }
 
   // Get file list from directory structure
-  const files = await recursiveReaddir(root);
+  const files = await recursiveReaddir(root, options);
 
   const _i: ScanResults = {};
 
