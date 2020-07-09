@@ -3,7 +3,7 @@ import { scan, ScanResults } from '../dist/main';
 describe('Scan for existing folder', () => {
   let scanResults: ScanResults;
   beforeAll(async () => {
-    scanResults = await scan('./example', ['handler'], {
+    scanResults = await scan('example', ['handler'], {
       directoryBanlist: ['banned'],
     });
   });
@@ -117,7 +117,7 @@ describe('Scan for non-existant folder', () => {
 describe('Scan with complex replacer function', () => {
   let scanResults: ScanResults;
   beforeAll(async () => {
-    scanResults = await scan('./example', ['handler'], {
+    scanResults = await scan('example', ['handler'], {
       replaceFunction: (route: string) => {
         return route
           .replace(/\\/gi, '/') // Backslash to forward slash
