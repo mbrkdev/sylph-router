@@ -3,13 +3,13 @@ import fs from 'fs';
 
 export interface ScanOptions {
   directoryBanlist?: string[];
-  fileFilter?: string[];
+  extensions?: RegExp[];
   replaceFunction?: (route: string) => string;
 }
 
 const defaultScanOptions: ScanOptions = {
   directoryBanlist: [],
-  fileFilter: ['*.js', '*.ts', '!*.test.js', '!*.test.ts'],
+  extensions: [/(?<!\.test).[t|j]s$/],
 };
 
 type ScanImports = unknown & {
@@ -50,7 +50,13 @@ export async function scan(root: string, imports: string[], scanOptions?: ScanOp
         }
         if (allowPath) arrayOfFiles = getAllFiles(filePath, arrayOfFiles);
       } else {
-        arrayOfFiles.push(filePath);
+        if (options.extensions) {
+          options.extensions.forEach((ext) => {
+            if (ext.test(filePath)) {
+              arrayOfFiles.push(filePath);
+            }
+          });
+        }
       }
     });
 

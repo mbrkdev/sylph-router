@@ -23,6 +23,18 @@ describe('Scan for existing folder', () => {
   test('banned folder should not produce any subfolder results', async () => {
     expect(Object.keys(scanResults).indexOf('banned/sub-banned/also-banned.js')).toBe(-1);
   });
+
+  test('a *.test.js file is not included', async () => {
+    expect(!!scanResults['get/index.test.js']).toBe(false);
+  });
+
+  test('a markdown file is not included', async () => {
+    expect(!!scanResults['public/test.md']).toBe(false);
+  });
+
+  test('the test.js file is included', async () => {
+    expect(!!scanResults['get/test.js']).toBe(true);
+  });
 });
 
 describe('Scan with replacer function', () => {
